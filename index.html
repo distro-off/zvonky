@@ -3,161 +3,237 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZVONKY | PRIVATE BETA</title>
+    <title>ZVONKY | DISTRO EDITION</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #050505; --panel: #111; --accent: #b388ff; --text: #fff; --red: #ff4d4d; }
-        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow: hidden; }
-        
-        /* AUTH */
-        #auth { height: 100vh; display: flex; justify-content: center; align-items: center; background: radial-gradient(circle, #1a0b2e, #050505); }
-        .auth-card { background: var(--panel); padding: 40px; border-radius: 30px; text-align: center; border: 1px solid #222; width: 300px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
-        .auth-card h1 { color: var(--accent); letter-spacing: 5px; margin-bottom: 30px; }
-        input { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #333; color: var(--accent); border-radius: 10px; box-sizing: border-box; outline: none; }
-        .btn-main { width: 100%; padding: 12px; background: var(--accent); border: none; border-radius: 10px; font-weight: 900; cursor: pointer; transition: 0.3s; }
-        .btn-main:hover { opacity: 0.8; transform: translateY(-2px); }
+        :root {
+            --bg: #000000;
+            --accent: #b388ff;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(179, 136, 255, 0.2);
+            --text: #ffffff;
+        }
 
-        /* APP LAYOUT */
-        #app { display: none; height: 100vh; grid-template-columns: 260px 1fr; }
-        aside { background: var(--panel); border-right: 1px solid #1a1a1a; display: flex; flex-direction: column; }
-        .u-item { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid #0a0a0a; transition: 0.3s; font-size: 14px; }
-        .u-item:hover { background: #181818; color: var(--accent); }
+        * {
+            cursor: none !important; /* Убираем стандартный курсор */
+            font-family: 'Montserrat', sans-serif;
+            box-sizing: border-box;
+        }
 
-        /* CHAT WINDOW */
-        main { display: flex; flex-direction: column; position: relative; background: #080808; }
-        #chat-window { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-        
-        .msg { padding: 12px 16px; border-radius: 20px; max-width: 75%; line-height: 1.4; animation: slideUp 0.2s ease; }
-        .msg b { display: block; font-size: 11px; margin-bottom: 4px; color: var(--accent); text-transform: uppercase; }
-        .m-in { background: #1a1a1a; align-self: flex-start; border-bottom-left-radius: 4px; }
-        .m-out { background: var(--accent); color: #000; align-self: flex-end; border-bottom-right-radius: 4px; }
+        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg); color: var(--text); overflow: hidden; }
 
-        /* CALL OVERLAY */
-        #call-ui { position: absolute; inset: 0; background: #000; z-index: 1000; display: none; flex-direction: column; }
-        .video-grid { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
-        .v-slot { background: #111; border-radius: 25px; overflow: hidden; border: 1px solid #222; position: relative; }
-        video { width: 100%; height: 100%; object-fit: cover; }
+        /* КАСТОМНЫЙ КУРСОР DISTRO */
+        #cursor {
+            width: 8px; height: 8px; background: var(--accent);
+            border-radius: 50%; position: fixed; pointer-events: none;
+            z-index: 9999; box-shadow: 0 0 15px var(--accent);
+            transition: transform 0.1s ease;
+        }
 
-        .call-bar { height: 100px; display: flex; justify-content: center; align-items: center; gap: 20px; background: rgba(10,10,10,0.9); }
-        .c-btn { width: 55px; height: 55px; border-radius: 50%; border: none; cursor: pointer; font-size: 22px; transition: 0.3s; }
-        .c-red { background: var(--red); color: #fff; }
-        .c-gray { background: #333; color: #fff; }
-        .c-active { background: var(--accent); color: #000; }
+        /* ЭКРАН ВХОДА */
+        #auth {
+            height: 100vh; display: flex; justify-content: center; align-items: center;
+            background: radial-gradient(circle at center, #120a21 0%, #000 100%);
+        }
+        .auth-card {
+            background: var(--glass); backdrop-filter: blur(10px);
+            padding: 50px; border-radius: 40px; border: 1px solid var(--border);
+            text-align: center; width: 380px;
+        }
+        .logo-img { width: 100px; border-radius: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(179,136,255,0.3); }
+        input {
+            width: 100%; padding: 15px; margin: 10px 0; background: rgba(255,255,255,0.05);
+            border: 1px solid transparent; border-radius: 12px; color: var(--accent);
+            text-align: center; font-weight: bold; outline: none; transition: 0.3s;
+        }
+        input:focus { border-color: var(--accent); background: rgba(255,255,255,0.08); }
+        .btn-distro {
+            width: 100%; padding: 15px; background: var(--accent); border: none;
+            border-radius: 12px; color: #000; font-weight: 900; letter-spacing: 2px;
+            cursor: pointer; margin-top: 20px;
+        }
 
-        .input-bar { padding: 20px; background: var(--panel); display: flex; gap: 15px; align-items: center; }
-        .input-bar input { flex: 1; margin: 0; }
+        /* ОСНОВНОЙ ИНТЕРФЕЙС */
+        #app { display: none; height: 100vh; grid-template-columns: 320px 1fr; }
 
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        aside { 
+            background: #050505; border-right: 1px solid var(--border); 
+            display: flex; flex-direction: column; 
+        }
+        .sidebar-header { 
+            padding: 30px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 15px;
+        }
+        .u-item {
+            padding: 20px 30px; transition: 0.3s; border-bottom: 1px solid rgba(255,255,255,0.02);
+            font-weight: 700; color: rgba(255,255,255,0.5);
+        }
+        .u-item:hover, .u-item.active { background: var(--glass); color: var(--accent); border-left: 4px solid var(--accent); }
+
+        main { display: flex; flex-direction: column; background: #000; position: relative; }
+        .chat-nav { 
+            padding: 20px 40px; border-bottom: 1px solid var(--border); 
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
+        }
+
+        #chat-window { 
+            flex: 1; padding: 40px; overflow-y: auto; 
+            display: flex; flex-direction: column; gap: 20px;
+        }
+        .msg { padding: 15px 25px; border-radius: 25px; max-width: 60%; line-height: 1.5; font-size: 14px; }
+        .msg b { color: var(--accent); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; display: block; }
+        .m-in { background: var(--glass); align-self: flex-start; border: 1px solid rgba(255,255,255,0.05); }
+        .m-out { background: var(--accent); color: #000; align-self: flex-end; font-weight: 600; }
+
+        /* ПАНЕЛЬ ВВОДА */
+        .input-area { 
+            padding: 30px 40px; background: transparent; 
+            display: flex; gap: 20px; align-items: center; 
+        }
+        .msg-input { flex: 1; text-align: left; background: var(--glass); border: 1px solid var(--border); border-radius: 30px; }
+
+        /* ЗВОНОК */
+        #call-ui { 
+            position: absolute; inset: 0; background: #000; z-index: 2000; 
+            display: none; flex-direction: column; 
+        }
+        .video-grid { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 30px; }
+        video { width: 100%; height: 100%; object-fit: cover; border-radius: 30px; border: 1px solid var(--accent); }
+        .controls { height: 150px; display: flex; justify-content: center; gap: 30px; align-items: center; }
+        .c-btn { width: 70px; height: 70px; border-radius: 50%; border: 1px solid var(--accent); background: transparent; color: var(--accent); font-size: 24px; }
+        .c-red { background: #ff4d4d; border: none; color: #fff; }
+
     </style>
 </head>
 <body>
 
+    <div id="cursor"></div>
+
     <div id="auth">
         <div class="auth-card">
-            <h1>ZVONKY</h1>
-            <input type="text" id="login" placeholder="ЛОГИН">
-            <input type="password" id="pass" placeholder="ПАРОЛЬ">
-            <button class="btn-main" onclick="initApp()">ENTER</button>
+            <img src="zvonky.jpeg" class="logo-img" alt="logo">
+            <h1 style="letter-spacing: 5px; font-weight: 900; margin-bottom: 30px;">ZVONKY</h1>
+            <input type="text" id="login" placeholder="LOGIN">
+            <input type="password" id="pass" placeholder="PASSWORD">
+            <button class="btn-distro" onclick="init()">ENTER SYSTEM</button>
         </div>
     </div>
 
     <div id="app">
         <aside>
-            <div style="padding: 25px; font-weight: 900; color: var(--accent); letter-spacing: 2px;">ZVONKY BETA</div>
-            <div class="u-item">@maraby</div>
-            <div class="u-item">@nur</div>
-            <div class="u-item">@azerslow</div>
+            <div class="sidebar-header">
+                <img src="zvonky.jpeg" style="width: 40px; border-radius: 10px;">
+                <span style="font-weight: 900; letter-spacing: 2px;">PANEL</span>
+            </div>
+            <div id="contacts"></div>
         </aside>
-        
+
         <main>
             <div id="call-ui">
                 <div class="video-grid">
-                    <div class="v-slot"><video id="localVid" autoplay muted></video></div>
-                    <div class="v-slot"><video id="remoteVid" autoplay></video></div>
+                    <video id="localVid" autoplay muted></video>
+                    <video id="remoteVid" autoplay></video>
                 </div>
-                <div class="call-bar">
-                    <button class="c-btn c-gray" id="camBtn" onclick="toggleCam()">📷</button>
-                    <button class="c-btn c-gray" id="micBtn" onclick="toggleMic()">🎤</button>
+                <div class="controls">
+                    <button class="c-btn" onclick="toggleMic()">🎤</button>
                     <button class="c-btn c-red" onclick="hangup()">📞</button>
                 </div>
             </div>
 
-            <div style="padding: 15px 25px; background: var(--panel); display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #1a1a1a;">
-                <span id="target" style="font-weight:bold; color:var(--accent);"># general_chat</span>
-                <button onclick="startCall()" style="background:none; border:none; cursor:pointer; font-size:24px; color:var(--accent);">📞</button>
+            <div class="chat-nav">
+                <h2 id="target-name" style="font-size: 14px; letter-spacing: 2px; color: var(--accent);">SELECT CLIENT</h2>
+                <button onclick="startCall()" id="call-btn" style="background:none; border:none; color:var(--accent); font-size:24px; display:none;">📞</button>
             </div>
-            
+
             <div id="chat-window"></div>
-            
-            <div class="input-bar">
-                <button style="background:none; border:none; font-size:24px; cursor:pointer; color:var(--accent);">🎙️</button>
-                <input type="text" id="msg" placeholder="Написать сообщение...">
-                <button class="btn-main" style="width:auto; padding: 10px 25px;" onclick="send()">SEND</button>
+
+            <div class="input-area">
+                <button style="background:none; border:none; color:var(--accent); font-size:24px;">🎙️</button>
+                <input type="text" id="msg-input" class="msg-input" placeholder="WRITE MESSAGE...">
+                <button class="btn-distro" style="width:auto; padding: 10px 30px; margin:0;" onclick="send()">SEND</button>
             </div>
         </main>
     </div>
 
     <script>
-        // ТВОИ ДАННЫЕ SUPABASE
         const SB_URL = 'https://fgtbyehvahnhhcsyhtjk.supabase.co';
         const SB_KEY = 'sb_publishable_AlR-LagSybFUYS5XSyGIug_52ZyF9cW';
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
-        
-        const ACCOUNTS = { 
-            "azer": "zvonkygive00", 
-            "maraby": "zvonkygive00", 
-            "nur": "zvonkygive", 
-            "azerslow": "zvonkygive00" 
-        };
+
+        const ACCOUNTS = { "azer": "zvonkygive00", "maraby": "zvonkygive00", "nur": "zvonkygive", "azerslow": "zvonkygive00" };
+        const USERS = ["azer", "maraby", "nur", "azerslow"];
 
         let me = "";
+        let currentTarget = null;
         let peer = null;
         let localStream = null;
 
-        async function initApp() {
+        // КУРСОР
+        document.addEventListener('mousemove', e => {
+            const cursor = document.getElementById('cursor');
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        async function init() {
             const u = document.getElementById('login').value.toLowerCase();
             const p = document.getElementById('pass').value;
-            
             if (ACCOUNTS[u] === p) {
                 me = u;
                 document.getElementById('auth').style.display = 'none';
                 document.getElementById('app').style.display = 'grid';
-                
-                // Звонки через PeerJS
-                peer = new Peer(me + "-zvonky-v1"); 
-                peer.on('call', call => {
-                    if(confirm("Входящий звонок от друга! Ответить?")) {
-                        answerCall(call);
-                    }
-                });
-                
-                loadHistory();
-                subscribeToUpdates();
-            } else { alert("Доступ запрещен!"); }
+                renderContacts();
+                peer = new Peer(me + "-distro-v2");
+                peer.on('call', call => { if(confirm("Входящий звонок...")) answerCall(call); });
+                subscribe();
+            } else { alert("ACCESS DENIED"); }
         }
 
-        async function loadHistory() {
-            const { data } = await _supabase.from('messages').select('*').order('created_at', { ascending: true });
-            if(data) data.forEach(m => renderMessage(m.sender, m.content));
+        function renderContacts() {
+            const list = document.getElementById('contacts');
+            USERS.forEach(user => {
+                if(user === me) return;
+                const div = document.createElement('div');
+                div.className = 'u-item';
+                div.id = `u-${user}`;
+                div.innerText = `@${user.toUpperCase()}`;
+                div.onclick = () => selectChat(user);
+                list.appendChild(div);
+            });
         }
 
-        function subscribeToUpdates() {
-            _supabase.channel('public:messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, 
-            payload => { 
-                if(payload.new.sender !== me) renderMessage(payload.new.sender, payload.new.content); 
-            }).subscribe();
+        async function selectChat(user) {
+            currentTarget = user;
+            document.getElementById('target-name').innerText = `CLIENT: @${user.toUpperCase()}`;
+            document.getElementById('call-btn').style.display = 'block';
+            document.querySelectorAll('.u-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`u-${user}`).classList.add('active');
+            
+            document.getElementById('chat-window').innerHTML = '';
+            const { data } = await _supabase.from('messages')
+                .select('*')
+                .or(`and(sender.eq.${me},receiver.eq.${currentTarget}),and(sender.eq.${currentTarget},receiver.eq.${me})`)
+                .order('created_at', { ascending: true });
+            if(data) data.forEach(m => renderMsg(m.sender, m.content));
+        }
+
+        function subscribe() {
+            _supabase.channel('messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, 
+            p => { if (p.new.sender === currentTarget && p.new.receiver === me) renderMsg(p.new.sender, p.new.content); }).subscribe();
         }
 
         async function send() {
-            const txt = document.getElementById('msg').value;
-            if(!txt) return;
-            renderMessage(me, txt);
-            await _supabase.from('messages').insert([{ sender: me, content: txt }]);
-            document.getElementById('msg').value = "";
+            const txt = document.getElementById('msg-input').value;
+            if(!txt || !currentTarget) return;
+            renderMsg(me, txt);
+            await _supabase.from('messages').insert([{ sender: me, receiver: currentTarget, content: txt }]);
+            document.getElementById('msg-input').value = "";
         }
 
-        function renderMessage(user, text) {
+        function renderMsg(user, text) {
             const win = document.getElementById('chat-window');
             const div = document.createElement('div');
             div.className = `msg ${user === me ? 'm-out' : 'm-in'}`;
@@ -166,26 +242,20 @@
             win.scrollTop = win.scrollHeight;
         }
 
-        // ЗВОНКИ
         async function startCall() {
             document.getElementById('call-ui').style.display = 'flex';
             localStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
             document.getElementById('localVid').srcObject = localStream;
-
-            const friend = prompt("Кому звоним? (maraby / nur / azerslow / azer)");
-            if(!friend) return hangup();
-            
-            const call = peer.call(friend + "-zvonky-v1", localStream);
+            const call = peer.call(currentTarget + "-distro-v2", localStream);
             call.on('stream', rs => document.getElementById('remoteVid').srcObject = rs);
         }
 
-        async function answerCall(incoming) {
+        async function answerCall(call) {
             document.getElementById('call-ui').style.display = 'flex';
             localStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
             document.getElementById('localVid').srcObject = localStream;
-            
-            incoming.answer(localStream);
-            incoming.on('stream', rs => document.getElementById('remoteVid').srcObject = rs);
+            call.answer(localStream);
+            call.on('stream', rs => document.getElementById('remoteVid').srcObject = rs);
         }
 
         function hangup() {
@@ -193,19 +263,7 @@
             if(localStream) localStream.getTracks().forEach(t => t.stop());
         }
 
-        function toggleCam() {
-            const t = localStream.getVideoTracks()[0];
-            t.enabled = !t.enabled;
-            document.getElementById('camBtn').classList.toggle('c-active');
-        }
-
-        function toggleMic() {
-            const t = localStream.getAudioTracks()[0];
-            t.enabled = !t.enabled;
-            document.getElementById('micBtn').classList.toggle('c-active');
-        }
-
-        document.getElementById('msg').onkeypress = (e) => { if(e.key==='Enter') send(); };
+        document.getElementById('msg-input').onkeypress = (e) => { if(e.key==='Enter') send(); };
     </script>
 </body>
 </html>
