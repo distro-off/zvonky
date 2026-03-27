@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>DJ TXLLS - TRULIMERO TRULICINA FUNK</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Montserrat:wght@300&display=swap');
+
+        body {
+            background-color: #000;
+            color: #bf94ff; /* Сиреневый цвет */
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            /* Уникальный курсор для всей страницы */
+            cursor: crosshair; 
+        }
+
+        .main-container {
+            text-align: center;
+        }
+
+        /* Контейнер обложки */
+        .cover-wrapper {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin-bottom: 30px;
+            border: 2px solid #bf94ff;
+            box-shadow: 0 0 20px rgba(191, 148, 255, 0.2);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+
+        .cover-wrapper:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 40px rgba(191, 148, 255, 0.4);
+        }
+
+        .cover-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Кнопка Play при наведении */
+        .play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .cover-wrapper:hover .play-overlay {
+            opacity: 1;
+        }
+
+        .play-button {
+            width: 80px;
+            height: 80px;
+            background: rgba(191, 148, 255, 0.8);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 0 15px #fff;
+        }
+
+        .play-button::after {
+            content: '';
+            border-style: solid;
+            border-width: 15px 0 15px 25px;
+            border-color: transparent transparent transparent #000;
+            margin-left: 5px;
+        }
+
+        /* Текстовые блоки */
+        .artist-name {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 2.5em;
+            font-weight: 700;
+            letter-spacing: 5px;
+            margin: 10px 0;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(191, 148, 255, 0.8);
+        }
+
+        .track-title {
+            font-size: 0.9em;
+            letter-spacing: 3px;
+            opacity: 0.8;
+            font-weight: 300;
+        }
+
+        footer {
+            position: absolute;
+            bottom: 20px;
+            font-size: 0.7em;
+            letter-spacing: 2px;
+            opacity: 0.5;
+        }
+
+        /* Анимация пульсации при игре */
+        .playing {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 20px rgba(191, 148, 255, 0.4); }
+            50% { box-shadow: 0 0 50px rgba(191, 148, 255, 0.7); }
+            100% { box-shadow: 0 0 20px rgba(191, 148, 255, 0.4); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="cover-wrapper" id="playerToggle">
+            <img src="cover.jpg" alt="TRULIMERO TRULICHINA FUNK" class="cover-image">
+            <div class="play-overlay">
+                <div class="play-button"></div>
+            </div>
+        </div>
+
+        <div class="artist-name">DJ TXLLS</div>
+        <div class="track-title">TRULIMERO TRULICINA FUNK</div>
+    </div>
+
+    <footer>© 2026 DISTRO</footer>
+
+    <audio id="audioTrack" src="track.mp3"></audio>
+
+    <script>
+        const playerToggle = document.getElementById('playerToggle');
+        const audio = document.getElementById('audioTrack');
+        let isPlaying = false;
+
+        playerToggle.addEventListener('click', () => {
+            if (!isPlaying) {
+                audio.play();
+                playerToggle.classList.add('playing');
+                isPlaying = true;
+            } else {
+                audio.pause();
+                playerToggle.classList.remove('playing');
+                isPlaying = false;
+            }
+        });
+
+        // Сброс анимации по окончании трека
+        audio.onended = () => {
+            playerToggle.classList.remove('playing');
+            isPlaying = false;
+        };
+    </script>
+</body>
+</html>
